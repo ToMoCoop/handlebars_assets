@@ -20,20 +20,26 @@ module HandlebarsAssets
 
       template_namespace = HandlebarsAssets::Config.template_namespace
 
-      if template_path.is_partial?
-        <<-PARTIAL
-          (function() {
-            Handlebars.registerPartial(#{template_path.name}, Handlebars.template(#{compiled_hbs}));
-          }).call(this);
-        PARTIAL
-      else
+      if HandlebarsAssets::Config.for_ember
         <<-TEMPLATE
-          (function() {
-            this.#{template_namespace} || (this.#{template_namespace} = {});
-            this.#{template_namespace}[#{template_path.name}] = Handlebars.template(#{compiled_hbs});
-            return this.#{template_namespace}[#{template_path.name}];
-          }).call(this);
+          this.#{template_namespace}[#{template_path.name}] = Ember.Handlebars.compile(#{source});
         TEMPLATE
+      else
+        if template_path.is_partial?
+          <<-PARTIAL
+            (function() {
+              Handlebars.registerPartial(#{template_path.name}, Handlebars.template(#{compiled_hbs}));
+            }).call(this);
+          PARTIAL
+        else
+          <<-TEMPLATE
+            (function() {
+              this.#{template_namespace} || (this.#{template_namespace} = {});
+              this.#{template_namespace}[#{template_path.name}] = Handlebars.template(#{compiled_hbs});
+              return this.#{template_namespace}[#{template_path.name}];
+            }).call(this);
+          TEMPLATE
+        end
       end
     end
 
