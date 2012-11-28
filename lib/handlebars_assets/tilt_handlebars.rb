@@ -21,7 +21,7 @@ module HandlebarsAssets
       template_namespace = HandlebarsAssets::Config.template_namespace
 
       if HandlebarsAssets::Config.for_ember
-        source_one_line = source.gsub(/\n/,"").gsub(/\r/,"")
+        source_one_line = source.gsub(/([^\n])\n([^\n])/, '\1 \2').chomp
         <<-TEMPLATE
           this.#{template_namespace}[#{template_path.name}] = Ember.Handlebars.compile("#{source_one_line}");
         TEMPLATE
